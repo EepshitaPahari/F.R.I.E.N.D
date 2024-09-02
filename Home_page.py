@@ -63,11 +63,11 @@ root.geometry("500x300")  # Adjusted window size to accommodate horizontal layou
 
 # Load and resize Images
 img_width, img_height = 40, 40  # Adjust the size as needed
-emergency_img = load_and_resize_image("emergency.jpg", img_width, img_height)
-health_monitoring_img = load_and_resize_image("health1.png", img_width, img_height)
-medication_management_img = load_and_resize_image("medi.jpeg", img_width, img_height)
-communication_img = load_and_resize_image("video.png", img_width, img_height)
-settings_img = load_and_resize_image("download (1).png", img_width, img_height)
+emergency_img = load_and_resize_image("./emergency.jpg", img_width, img_height)
+health_monitoring_img = load_and_resize_image("./health1.png", img_width, img_height)
+medication_management_img = load_and_resize_image("./medi.jpeg", img_width, img_height)
+communication_img = load_and_resize_image("/.video.png", img_width, img_height)
+settings_img = load_and_resize_image("./download (1).png", img_width, img_height)
 
 # Main Frame
 main_frame = tk.Frame(root)
