@@ -18,7 +18,7 @@ def get_SPO():
     Reads and returns the SpO2 level from the MAX30100 sensor.
     """
     mx30.read_sensor()
-    spo2 = int(mx30.red / 100)-15  # Calculate SpO2 from RED data
+    spo2 = int(mx30.red / 100)-10  # Calculate SpO2 from RED data
     
     if(spo2<0):
         return 0

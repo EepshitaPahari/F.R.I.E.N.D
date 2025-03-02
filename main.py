@@ -1,23 +1,27 @@
 import tkinter as tk
+from fall_check import fall_alert
 from tkinter import Button, Toplevel, Label, Entry, messagebox
 from PIL import Image, ImageTk
 from health import run_patient_monitor
 import time
 import threading
-from playsound import playsound
+from notification import fall_noti
 import os
-from meeting_app_2 import video_call
+from cal import calling
 medication_entries = []
 time_entries = []
 # File path for saving medication data
 file_path = "medication_data.txt"
 # Function to open the medication page
+stop_event = threading.Event()
+fall_thread = threading.Thread(target=fall_alert,)
+
 def open_medication_page(username):
     medication_window = Toplevel()
     medication_window.geometry('480x320')
     medication_window.title('Medication Alarm')
     medication_window.config(bg="black")
-
+    fall_thread.start()
     def add_on():
         submit()
     # Check if there are existing entries before trying to access them
@@ -113,32 +117,7 @@ def open_medication_page(username):
                 button.grid(row=row_val, column=col_val, padx=1, pady=2, sticky="ew")
                 col_val += 1
 
-    def validate_time_format(alarm_time):
-        """Validate the alarm time format (HH:MM)."""
-        try:
-            time.strptime(alarm_time, "%H:%M")
-            return True
-        except ValueError:
-            return False
-
-    def check_alarms():
-        current_time = time.strftime("%H:%M")
-        for time_entry in time_entries:
-            alarm_time = time_entry.get().strip()
-            if alarm_time == current_time:
-                threading.Thread(target=playsound, args=("Audio.mp3",), daemon=True).start()
-        # Schedule the next check
-        medication_window.after(1000, check_alarms)
-
-    def set_alarm(alarm_time):
-        # Schedule the alarm check
-        medication_window.after(1000, lambda: check_alarm_once(alarm_time))
-
-    def check_alarm_once(alarm_time):
-        current_time = time.strftime("%H:%M")
-        if current_time == alarm_time:
-            playsound("Audio.mp3")
-        # Schedule the next check if needed (e.g., for recurring alarms)
+    
 
     def submit():
         for med_entry, time_entry in zip(medication_entries, time_entries):
@@ -146,23 +125,20 @@ def open_medication_page(username):
          alarm_time = time_entry.get()
          if med and alarm_time:
             print(f"Medication Name: {med}, Alarm Time: {alarm_time}")
-            # Start a new thread for each alarm
-            threading.Thread(target=set_alarm, args=(alarm_time,), daemon=True).start()
-            # Write the medication and time to the file
+           # Write the medication and time to the file
             with open(file_path, "a") as file:
                 file.write(f"{med},{alarm_time}\n")
-               
+              
        
     add_on()
-    check_alarms()
     create_keyboard()
 
-    # Add button to add more entries
-    add_button = Button(medication_window, text="Add", font='Calibri 8 bold', bg="blue", fg="white", command=add_on )
+    # Save button to add more entries
+    add_button = Button(medication_window, text="Save", font='Calibri 8 bold', bg="blue", fg="white", command=add_on )
     add_button.grid(row=0, column=1, padx=10, pady=10, columnspan=2)
 
-    # Done button to save entries
-    done_button = Button(medication_window, text="Done", font='Calibri 8 bold', bg="blue", fg="white", command=lambda: main_interface(username) )
+    # Next button to save entries
+    done_button = Button(medication_window, text="Next", font='Calibri 8 bold', bg="blue", fg="white", command=lambda:main_interface(username))
     done_button.grid(row=0, column=3, padx=10, pady=10)
 
 # Function definitions for main interface
@@ -223,14 +199,7 @@ def show_medication_management():
            
     set_button = Button(medication_window, text="Set", bg="blue", fg="white", command=lambda: open_medication_page(username=''))
     set_button.grid(row=0, column=1)
-def show_emergency():
-    emergency_window=Toplevel()
-    emergency_window.geometry('480x320')
-    emergency_window.title('Emergency')
-    lab=Label(emergency_window,text="Calling...",font="Calibri 32 bold")
-    lab.grid(row=3,column=3,padx=5,pady=5)
-    close_button = Button(emergency_window, text="X", command=emergency_window.destroy, bg='red', fg='white')
-    close_button.grid(row=0,column=5)
+
 
 def show_health_monitoring():
     health_monitoring_window = tk.Toplevel(root)
@@ -261,11 +230,18 @@ def load_and_resize_image(file_path, width, height):
 
 # Function to display the main interface after sign-in and medication setup
 def main_interface(username):
+    from alarm import set_alarm #for most recent medicine_data
+    alarm_thread = threading.Thread(target= set_alarm,)
+    alarm_thread.start()
     main_window = tk.Toplevel()
     main_window.title("Elderly Assistance Device")
     main_window.geometry("480x320") 
     main_window.config(bg="black")
-
+    
+    #Emergency box
+    def show_emergency():
+        fall_noti()
+        messagebox.showwarning("Emergency", "Notification sent", parent=main_window)
     # Load and resize Images
     img_width, img_height =70, 70 # Adjust the size as needed
     emergency_img = load_and_resize_image("emergency.jpg", img_width, img_height)
@@ -299,7 +275,7 @@ def main_interface(username):
     tk.Label(button_frame,text="medication",font=("Arial", 8,"italic"), fg="white",bg="black").grid(row=4,column=1,padx=10,pady=1)
   
     # Communication Button
-    tk.Button(button_frame, command=video_call, image=communication_img, compound="left",bg="black",width=70, height=70).grid(row=3,column=2, padx=10,pady=1)
+    tk.Button(button_frame, command=calling, image=communication_img, compound="left",bg="black",width=70, height=70).grid(row=3,column=2, padx=10,pady=1)
     tk.Label(button_frame,text="communication",font=("Arial", 8,"italic"), fg="white",bg="black").grid(row=4,column=2,padx=10,pady=1)
    
     # Keep a reference to the images to prevent them from being garbage collected
@@ -308,6 +284,7 @@ def main_interface(username):
     main_window.medication_management_img = medication_management_img
     main_window.communication_img = communication_img
 
+    
 # Main Application
 root = tk.Tk()
 root.title("Elderly Assistance Device")
