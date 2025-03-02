@@ -197,8 +197,8 @@ def show_medication_management():
         print("No medication data found.")
         tk.Label(medication_window, text="No medication data available", font=("Arial", 12), bg="black", fg="white").grid(row=1, column=1, columnspan=2, padx=5, pady=5)
            
-    set_button = Button(medication_window, text="Set", bg="blue", fg="white", command=lambda: open_medication_page(username=''))
-    set_button.grid(row=0, column=1)
+    #set_button = Button(medication_window, text="Set", bg="blue", fg="white", command=lambda: open_medication_page(username=''))
+    #set_button.grid(row=0, column=1)
 
 
 def show_health_monitoring():
