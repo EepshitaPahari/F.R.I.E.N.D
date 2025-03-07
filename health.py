@@ -44,7 +44,7 @@ def run_patient_monitor():
             heart_rate = get_pulse()
             systolic_bp = random.randint(110, 130)
             diastolic_bp = random.randint(70, 90)
-            temperature = get_temp()
+            temperature = random.uniform(36.1, 37.2)#get_temp()
             respiration_rate = random.randint(12, 20)
             oxygen_saturation = get_SPO()
 
